@@ -1,7 +1,9 @@
 #ifndef SNIFFER_H
 #define SNIFFER_H
 
-class Sniffer
+#include <QObject>
+
+class Sniffer : public QObject
 {
 public:
     Sniffer();

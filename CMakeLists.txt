@@ -18,7 +18,7 @@ set(PROJECT_SOURCES
         main.cpp
         ui.cpp
         ui.h
-        ui.ui
+
         ${TS_FILES}
 )
 
@@ -27,6 +27,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         sniffer.h sniffer.cpp
+        snifferfacade.h snifferfacade.cpp
+        packet.h packet.cpp
+        analyzer.h analyzer.cpp
+        filterstrategy.h filterstrategy.cpp
+        statistics.h statistics.cpp
+        filemanager.h filemanager.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Web_Sniffer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

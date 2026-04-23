@@ -3,11 +3,10 @@
 
 #include <QMainWindow>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-class UI;
-}
-QT_END_NAMESPACE
+class QPushButton;
+class QLineEdit;
+class QTableView;
+class SnifferFacade;
 
 class UI : public QMainWindow
 {
@@ -17,7 +16,18 @@ public:
     UI(QWidget *parent = nullptr);
     ~UI();
 
+private slots:
+    void onStartClicked();
+    void onStopClicked();
+
 private:
-    Ui::UI *ui;
+    void setupUI();
+
+    QPushButton *btnStart;
+    QPushButton *btnStop;
+    QLineEdit *filterInput;
+    QTableView *packetTable;
+
+    SnifferFacade *facade;
 };
 #endif // UI_H
