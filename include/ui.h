@@ -5,7 +5,8 @@
 
 class QPushButton;
 class QLineEdit;
-class QTableView;
+class QTableWidget;
+class QComboBox;
 class SnifferFacade;
 
 class UI : public QMainWindow
@@ -16,17 +17,22 @@ public:
     UI(QWidget *parent = nullptr);
     ~UI();
 
+    void setInterfaceError(bool hasError);
+
 private slots:
     void onStartClicked();
     void onStopClicked();
+    void onInterfaceChanged();
 
 private:
     void setupUI();
+    void applyStyles();
 
+    QComboBox *comboInterface;
+    QLineEdit *filterInput;
     QPushButton *btnStart;
     QPushButton *btnStop;
-    QLineEdit *filterInput;
-    QTableView *packetTable;
+    QTableWidget *packetTable;
 
     SnifferFacade *facade;
 };
