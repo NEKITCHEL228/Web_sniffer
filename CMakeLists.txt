@@ -1,84 +1,64 @@
 cmake_minimum_required(VERSION 3.16)
 
+# 1. Задаёт имя проекта
 project(Web_Sniffer VERSION 0.1 LANGUAGES CXX)
 
+# 2. Находит компилятор C++ с флагами -std=c++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Настройки для автоматической работы Qt с макросами (MOC, UI, RCC)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# 3. Подключение сторонних библиотек (find_package)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+# TODO: Для работы сниффера в будущем понадобится раскомментировать поиск PCAP
+# find_package(PCAP REQUIRED)
 
-set(TS_FILES Web_Sniffer_ru_RU.ts)
-
+# 4. Указывает список всех исходных файлов через set
 set(PROJECT_SOURCES
-        main.cpp
-        ui.cpp
-        ui.h
+    # Исходный код
+    src/main.cpp
+    src/ui.cpp
+    src/sniffer.cpp
+    src/snifferfacade.cpp
+    src/packet.cpp
+    src/analyzer.cpp
+    src/filterstrategy.cpp
+    src/statistics.cpp
+    src/filemanager.cpp
 
-        ${TS_FILES}
+    # Заголовочные файлы (теперь AUTOMOC их увидит)
+    include/ui.h
+    include/sniffer.h
+    include/snifferfacade.h
+    include/packet.h
+    include/analyzer.h
+    include/filterstrategy.h
+    include/statistics.h
+    include/filemanager.h
+
+    # Ресурсы (иконки)
+    resources.qrc
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(Web_Sniffer
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        sniffer.h sniffer.cpp
-        snifferfacade.h snifferfacade.cpp
-        packet.h packet.cpp
-        analyzer.h analyzer.cpp
-        filterstrategy.h filterstrategy.cpp
-        statistics.h statistics.cpp
-        filemanager.h filemanager.cpp
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET Web_Sniffer APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+# 5. Объявляет исполняемый файл
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-else()
-    if(ANDROID)
-        add_library(Web_Sniffer SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(Web_Sniffer
-            ${PROJECT_SOURCES}
-        )
-    endif()
-
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
-endif()
-
-target_link_libraries(Web_Sniffer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
-
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.Web_Sniffer)
-endif()
-set_target_properties(Web_Sniffer PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+# 6. Подключает заголовочные файлы через target_include_directories (Требование ТЗ!)
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-include(GNUInstallDirs)
-install(TARGETS Web_Sniffer
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+# 7. Линковка библиотек (target_link_libraries)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(Web_Sniffer)
-endif()
+# Локализация (если нужна)
+set(TS_FILES Web_Sniffer_ru_RU.ts)
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
+# Финализация для Qt6
+qt_finalize_executable(${PROJECT_NAME})
