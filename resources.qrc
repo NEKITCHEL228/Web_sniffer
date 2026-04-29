@@ -3,5 +3,11 @@
         <file>icons/Start.svg</file>
         <file>icons/Stop.svg</file>
         <file>icons/Choose.svg</file>
+        <file>icons/CloseButton.svg</file>
+        <file>icons/Download.svg</file>
+        <file>icons/Filter.svg</file>
+        <file>icons/SaveFilter.svg</file>
+        <file>icons/Settings.svg</file>
+        <file>icons/Upload.svg</file>
     </qresource>
 </RCC>

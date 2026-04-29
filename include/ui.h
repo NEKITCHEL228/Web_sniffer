@@ -2,6 +2,8 @@
 #define UI_H
 
 #include <QMainWindow>
+#include <memory>
+#include "packet.h"
 
 class QPushButton;
 class QLineEdit;
@@ -17,23 +19,28 @@ public:
     UI(QWidget *parent = nullptr);
     ~UI();
 
-    void setInterfaceError(bool hasError);
+public slots:
+    void onPacketReceived(std::shared_ptr<Packet> packet);
 
 private slots:
     void onStartClicked();
     void onStopClicked();
     void onInterfaceChanged();
+    void onRefreshInterfaces();
 
 private:
     void setupUI();
     void applyStyles();
+    void setupButtonContent(QPushButton* btn, const QString& text, const QString& iconPath);
+    void addPacketToTable(std::shared_ptr<Packet> packet);
 
     QComboBox *comboInterface;
     QLineEdit *filterInput;
     QPushButton *btnStart;
     QPushButton *btnStop;
+    QPushButton *btnRefreshInterfaces;
     QTableWidget *packetTable;
 
-    SnifferFacade *facade;
+    std::unique_ptr<SnifferFacade> facade;
 };
-#endif // UI_H
+#endif

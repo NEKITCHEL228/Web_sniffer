@@ -1,10 +1,19 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
 
-class FileManager
-{
+#include "packet.h"
+#include <vector>
+#include <QString>
+
+class FileManager {
 public:
-    FileManager();
+    static FileManager* getInstance();
+    bool saveToPcap(const QString &filename, const std::vector<std::shared_ptr<Packet>> &packets);
+    std::vector<std::shared_ptr<Packet>> loadFromPcap(const QString &filename);
+
+private:
+    FileManager() {}
+    static FileManager* instance;
 };
 
-#endif // FILEMANAGER_H
+#endif

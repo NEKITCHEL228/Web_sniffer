@@ -2,11 +2,29 @@
 #define SNIFFER_H
 
 #include <QObject>
+#include <memory>
 
-class Sniffer : public QObject
-{
-public:
-    Sniffer();
+class Packet;
+
+struct InterfaceInfo {
+    QString name;
+    QString description;
 };
 
-#endif // SNIFFER_H
+class Sniffer : public QObject {
+    Q_OBJECT
+public:
+    explicit Sniffer(QObject *parent = nullptr);
+    static std::vector<InterfaceInfo> getAvailableInterfaces();
+
+    void startCapture(const QString &interfaceName);
+    void stopCapture();
+
+signals:
+    void packetCaptured(std::shared_ptr<Packet> packet);
+
+private:
+    bool capturing;
+};
+
+#endif
