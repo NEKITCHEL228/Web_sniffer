@@ -122,10 +122,11 @@ void UI::setupUI() {
         Statistics::getInstance()->reset();
         updateStatistics();
     });
-    connect(btnFilter, &QPushButton::clicked, this, [this]() {
+    connect(btnFilter, &QPushButton::clicked, this, [this, btnFilter]() {
         if (!filterWidget->isVisible()) {
             filterWidget->adjustSize();
-            QPoint pos = filterInput->mapTo(this, QPoint(0, filterInput->height()));
+            QPoint pos = btnFilter->mapTo(this, QPoint(btnFilter->width(), btnFilter->height()));
+            pos.setX(pos.x() - filterWidget->width());
             pos.setY(pos.y() + 8);
             filterWidget->move(pos);
             filterWidget->raise();
@@ -294,7 +295,7 @@ void UI::applyStyles() {
         QPushButton#btnDownload { background-color: #22C55E; border: none; }
         QPushButton#btnDownload:hover { background-color: #16A34A}
         QTableWidget { background-color: #1E293B; border: 1px solid #334155; border-radius: 12px; color: #F8FAFC; gridline-color: #475569; selection-background-color: #334155; }
-        QHeaderView::section { background-color: #1E293B; color: #94A3B8; padding: 12px; border: none; border-bottom: 2px solid #334155; font-weight: bold; font-size: 11px; }
+        QHeaderView::section { background-color: #1E293B; color: #94A3B8; padding: 12px; border: none; border-right: 1px solid #475569; border-bottom: 2px solid #334155; font-weight: bold; font-size: 11px; }
         QTableWidget::item { padding: 12px; border-bottom: 1px solid #334155; font-family: 'JetBrains Mono'; font-size: 12px; }
     )");
 }
