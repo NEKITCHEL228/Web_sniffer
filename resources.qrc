@@ -9,5 +9,6 @@
         <file>icons/SaveFilter.svg</file>
         <file>icons/Settings.svg</file>
         <file>icons/Upload.svg</file>
+        <file>icons/Clear.svg</file>
     </qresource>
 </RCC>

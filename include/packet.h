@@ -14,6 +14,8 @@ public:
     QString getProtocol() const { return protocol; }
     int getSize() const { return size; }
     QString getTime() const { return timestamp; }
+    virtual uint16_t getSrcPort() const { return 0; }
+    virtual uint16_t getDestPort() const { return 0; }
 
     virtual QString getInfo() const = 0;
 
@@ -30,6 +32,8 @@ class TcpPacket : public Packet {
     uint16_t destPort;
 public:
     TcpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
+    uint16_t getSrcPort() const override { return srcPort; }
+    uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 
@@ -38,6 +42,8 @@ class UdpPacket : public Packet {
     uint16_t destPort;
 public:
     UdpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
+    uint16_t getSrcPort() const override { return srcPort; }
+    uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         }
     }
     UI w;
-    w.setWindowTitle("Web_sniffer");
+    w.setWindowTitle("Web sniffer");
     w.show();
     return a.exec();
 }

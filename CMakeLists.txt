@@ -8,12 +8,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network)
 
 file(GLOB_RECURSE PROJECT_HEADERS "include/*.h")
 
 # Список исходных файлов
 set(PROJECT_SOURCES
+    ${PROJECT_HEADERS}
+    src/filterparser.cpp
     src/main.cpp
     src/ui.cpp
     src/sniffer.cpp
@@ -23,22 +25,22 @@ set(PROJECT_SOURCES
     src/packetfactory.cpp
     src/statistics.cpp
     src/filemanager.cpp
-    src/filterdialog.cpp
+    src/filterwidget.cpp
     src/filterstrategy.cpp
     resources.qrc
 )
 
 # Создание исполняемого файла
-qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
 # Пути к заголовочным файлам
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-#Подключаем библы
+# Подключение библиотек
 if(WIN32)
-    # Попытка найти Npcap SDK
+    # Попытка найти Npcap SDK (замените путь, если SDK лежит в другом месте)
     set(NPCAP_SDK_PATH "C:/Npcap-SDK" CACHE PATH "Path to Npcap SDK")
     target_include_directories(${PROJECT_NAME} PRIVATE ${NPCAP_SDK_PATH}/Include)
     target_link_directories(${PROJECT_NAME} PRIVATE ${NPCAP_SDK_PATH}/Lib/x64)
@@ -52,6 +54,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Widgets
     Qt6::Gui
     Qt6::Core
+    Qt6::Network
 )
 
 qt_finalize_executable(${PROJECT_NAME})
