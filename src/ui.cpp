@@ -47,6 +47,7 @@ void UI::setupUI() {
     btnClearTable->setFixedSize(44, 44);
     btnClearTable->setToolTip("Очистить таблицу");
     btnClearTable->setIcon(QIcon(":/icons/Clear.svg"));
+    btnClearTable->setIconSize(QSize(24, 24));
     topPanel->addWidget(btnClearTable);
 
     filterInput = new QLineEdit(this);
@@ -57,15 +58,18 @@ void UI::setupUI() {
     auto *btnFilter = new QPushButton(this);
     btnFilter->setFixedSize(44, 44);
     btnFilter->setIcon(QIcon(":/icons/Filter.svg"));
+    btnFilter->setIconSize(QSize(24, 24));
     topPanel->addWidget(btnFilter);
 
     btnStart = new QPushButton(this);
+    btnStart->setObjectName("btnStart");
     btnStart->setFixedHeight(44);
     btnStart->setMinimumWidth(120);
     setupButtonContent(btnStart, "НАЧАТЬ", ":/icons/Start.svg");
     topPanel->addWidget(btnStart);
 
     btnStop = new QPushButton(this);
+    btnStop->setObjectName("btnStop");
     btnStop->setFixedHeight(44);
     btnStop->setMinimumWidth(120);
     setupButtonContent(btnStop, "СТОП", ":/icons/Stop.svg");
@@ -86,13 +90,13 @@ void UI::setupUI() {
     packetTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     packetTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     packetTable->setAlternatingRowColors(false);
-    packetTable->setShowGrid(false);
+    packetTable->setShowGrid(true);
     packetTable->verticalHeader()->setVisible(false);
     mainLayout->addWidget(packetTable);
 
     // Bottom Panel
     auto *bottomPanel = new QHBoxLayout();
-    lblStatistics = new QLabel("Захвачено: 0 | Отображается: 0", this);
+    lblStatistics = new QLabel("Захвачено: 0 | Отображается: 0 | Общий объем: 0 байт", this);
     lblStatistics->setStyleSheet("color: #94A3B8; font-size: 14px;");
     bottomPanel->addWidget(lblStatistics);
 
@@ -118,10 +122,11 @@ void UI::setupUI() {
         Statistics::getInstance()->reset();
         updateStatistics();
     });
-    connect(btnFilter, &QPushButton::clicked, this, [this]() {
+    connect(btnFilter, &QPushButton::clicked, this, [this, btnFilter]() {
         if (!filterWidget->isVisible()) {
             filterWidget->adjustSize();
-            QPoint pos = filterInput->mapTo(this, QPoint(0, filterInput->height()));
+            QPoint pos = btnFilter->mapTo(this, QPoint(btnFilter->width(), btnFilter->height()));
+            pos.setX(pos.x() - filterWidget->width());
             pos.setY(pos.y() + 8);
             filterWidget->move(pos);
             filterWidget->raise();
@@ -241,25 +246,56 @@ void UI::addPacketToTable(std::shared_ptr<Packet> packet) {
 }
 
 void UI::setupButtonContent(QPushButton* btn, const QString& text, const QString& iconPath) {
-    btn->setText(text);
-    btn->setIcon(QIcon(iconPath));
-    btn->setIconSize(QSize(20, 20));
+    btn->setText("");
+    btn->setIcon(QIcon());
+
+    if (btn->layout()) {
+        QLayoutItem* item;
+        while ((item = btn->layout()->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+        delete btn->layout();
+    }
+
+    auto *layout = new QHBoxLayout(btn);
+    layout->setContentsMargins(16, 0, 12, 0);
+
+    auto *lblText = new QLabel(text, btn);
+    lblText->setStyleSheet("color: white; font-weight: bold; border: none; background: transparent; font-size: 12px; letter-spacing: 1px;");
+    lblText->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    auto *lblIcon = new QLabel(btn);
+    lblIcon->setPixmap(QIcon(iconPath).pixmap(24, 24));
+    lblIcon->setStyleSheet("border: none; background: transparent;");
+    lblIcon->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+    layout->addWidget(lblText);
+    layout->addStretch();
+    layout->addWidget(lblIcon);
 }
 
 void UI::applyStyles() {
     this->setStyleSheet(R"(
         QMainWindow { background-color: #0F172A; }
         QComboBox { background-color: #1E293B; border: 1px solid #334155; border-radius: 8px; color: #F8FAFC; padding: 0 12px; font-size: 13px; }
-        QComboBox::drop-down { border: none; }
+        QComboBox:hover {background-color: #334155}
+        QComboBox::drop-down { border: none; width: 44px; padding-right: 0px; }
+        QComboBox::down-arrow { image: url(":/icons/Choose.svg"); width: 20px; height: 20px; }
         QLineEdit { background-color: #1E293B; border: 1px solid #334155; border-radius: 8px; color: #F8FAFC; padding: 0 12px; font-size: 13px; }
+        QLineEdit:focus { background-color: #334155; }
         QPushButton { border-radius: 8px; font-weight: bold; font-size: 12px; letter-spacing: 1px; color: white; border: 1px solid #334155; background: #1E293B; }
         QPushButton:hover { background-color: #334155; }
         QPushButton#btnStart { background-color: #22C55E; border: none; }
+        QPushButton#btnStart:hover { background-color: #16A34A}
         QPushButton#btnStop { background-color: #EF4444; border: none; }
+        QPushButton#btnStop:hover { background-color: #DC2626}
         QPushButton#btnUpload { background-color: #3B82F6; border: none; }
+        QPushButton#btnUpload:hover { background-color: #2563EB}
         QPushButton#btnDownload { background-color: #22C55E; border: none; }
-        QTableWidget { background-color: #1E293B; border: 1px solid #334155; border-radius: 12px; color: #F8FAFC; gridline-color: transparent; selection-background-color: #334155; }
-        QHeaderView::section { background-color: #1E293B; color: #94A3B8; padding: 12px; border: none; border-bottom: 2px solid #334155; font-weight: bold; font-size: 11px; }
+        QPushButton#btnDownload:hover { background-color: #16A34A}
+        QTableWidget { background-color: #1E293B; border: 1px solid #334155; border-radius: 12px; color: #F8FAFC; gridline-color: #475569; selection-background-color: #334155; }
+        QHeaderView::section { background-color: #1E293B; color: #94A3B8; padding: 12px; border: none; border-right: 1px solid #475569; border-bottom: 2px solid #334155; font-weight: bold; font-size: 11px; }
         QTableWidget::item { padding: 12px; border-bottom: 1px solid #334155; font-family: 'JetBrains Mono'; font-size: 12px; }
     )");
 }

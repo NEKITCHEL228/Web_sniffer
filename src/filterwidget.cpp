@@ -27,10 +27,10 @@ void FilterWidget::setupUI() {
     headerLayout->addStretch();
 
     auto *btnClose = new QPushButton(this);
-    btnClose->setFixedSize(32, 32);
+    btnClose->setFixedSize(44, 44);
     btnClose->setObjectName("btnClose");
     btnClose->setIcon(QIcon(":/icons/CloseButton.svg"));
-    btnClose->setIconSize(QSize(16, 16));
+    btnClose->setIconSize(QSize(28, 28));
     headerLayout->addWidget(btnClose);
     mainLayout->addLayout(headerLayout);
 
@@ -54,7 +54,7 @@ void FilterWidget::setupUI() {
         btnOut->setFixedSize(44, 44);
         btnOut->setObjectName("btnRowSave");
         btnOut->setIcon(QIcon(":/icons/Filter.svg"));
-        btnOut->setIconSize(QSize(20, 20));
+        btnOut->setIconSize(QSize(24, 24));
         btnOut->setCheckable(true);
         gridLayout->addWidget(btnOut, row * 2 + 1, 1, 1, 1);
 
@@ -73,13 +73,24 @@ void FilterWidget::setupUI() {
     addEntry(2, "Фильтр по IP-адресу отправителя", srcIpEdit, srcIpBtn);
     addEntry(3, "Фильтр по протоколу", protoEdit, protoBtn);
 
-    btnSave = new QPushButton("Сохранить  ", this);
+    btnSave = new QPushButton(this);
     btnSave->setObjectName("btnSave");
     btnSave->setFixedHeight(44);
-    btnSave->setMinimumWidth(150);
-    btnSave->setIcon(QIcon(":/icons/SaveFile.svg"));
-    btnSave->setIconSize(QSize(20, 20));
-    btnSave->setLayoutDirection(Qt::RightToLeft);
+    btnSave->setMinimumWidth(160);
+
+    auto *saveLayout = new QHBoxLayout(btnSave);
+    saveLayout->setContentsMargins(16, 0, 12, 0);
+    auto *lblSaveText = new QLabel("Сохранить", btnSave);
+    lblSaveText->setStyleSheet("color: white; font-weight: bold; font-size: 14px; border: none; background: transparent;");
+    lblSaveText->setAttribute(Qt::WA_TransparentForMouseEvents);
+    auto *lblSaveIcon = new QLabel(btnSave);
+    lblSaveIcon->setPixmap(QIcon(":/icons/SaveFile.svg").pixmap(24, 24));
+    lblSaveIcon->setStyleSheet("border: none; background: transparent;");
+    lblSaveIcon->setAttribute(Qt::WA_TransparentForMouseEvents);
+    saveLayout->addWidget(lblSaveText);
+    saveLayout->addStretch();
+    saveLayout->addWidget(lblSaveIcon);
+
     gridLayout->addWidget(btnSave, 7, 3, 1, 1, Qt::AlignRight);
 
     mainLayout->addLayout(gridLayout);
@@ -103,7 +114,7 @@ SimpleFilterData FilterWidget::getFilterData() const {
 void FilterWidget::applyStyles() {
     this->setStyleSheet(R"(
         QWidget#filterWidgetObj {
-            background-color: #313F56;
+            background-color: #0F172A;
             border-radius: 12px;
             border: 1px solid #475569;
         }
@@ -112,12 +123,16 @@ void FilterWidget::applyStyles() {
             font-family: 'Inter', sans-serif;
         }
         QLineEdit {
-            background-color: #1a2234;
+            background-color: #1E293B;
             border: 1px solid #334155;
             border-radius: 8px;
             color: white;
             padding-left: 12px;
             font-size: 14px;
+        }
+        QLineEdit:focus {
+            background-color: #334155;
+            border: 1px solid #3B82F6;
         }
         QPushButton#btnClose {
             background-color: #EF4444;
@@ -127,16 +142,20 @@ void FilterWidget::applyStyles() {
         QPushButton#btnClose:hover { background-color: #DC2626; }
 
         QPushButton#btnRowSave {
-            background-color: transparent;
+            background-color: #EF4444;
             border-radius: 8px;
-            border: 1px solid #334155;
+            border: none;
+            color: white;
         }
         QPushButton#btnRowSave:hover {
-            background-color: #1a2234;
+            background-color: #DC2626;
         }
         QPushButton#btnRowSave:checked {
             background-color: #22C55E;
             border: none;
+        }
+        QPushButton#btnRowSave:checked:hover {
+            background-color: #16A34A;
         }
 
         QPushButton#btnSave {
@@ -146,7 +165,6 @@ void FilterWidget::applyStyles() {
             font-size: 14px;
             border-radius: 8px;
             border: none;
-            padding-right: 12px;
         }
         QPushButton#btnSave:hover { background-color: #16A34A; }
     )");
