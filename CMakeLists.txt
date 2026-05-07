@@ -36,7 +36,19 @@ set(PROJECT_SOURCES
 )
 
 # Создание исполняемого файла
-qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES}
+    tests/CMakeLists.txt
+    tests/unit/test_packet.cpp
+    tests/unit/test_analyzer.cpp
+    tests/unit/test_filemanager.cpp
+    tests/unit/test_filterparser.cpp
+    tests/unit/test_filterstrategy.cpp
+    tests/unit/test_packetfactory.cpp
+    tests/unit/test_sniffer.cpp
+    tests/unit/test_snifferfacade.cpp
+    tests/unit/test_statistics.cpp
+
+)
 
 # Пути к заголовочным файлам
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -82,5 +94,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Network
 )
+
+enable_testing()
+add_subdirectory(tests)
 
 qt_finalize_executable(${PROJECT_NAME})
