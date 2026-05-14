@@ -39,4 +39,36 @@ TEST_CASE("Statistics core functionality", "[Statistics]") {
         REQUIRE(stats->getTotalVolume() == 0);
         REQUIRE(stats->getProtocolStats().isEmpty());
     }
+
+    SECTION("Large number of packets update") {
+        for (int i = 0; i < 1000; ++i) {
+            auto p = std::make_shared<TcpPacket>("10.0.0.1", "10.0.0.2", 10, 80, 443);
+            stats->update(p);
+        }
+        REQUIRE(stats->getTotalPackets() == 1000);
+        REQUIRE(stats->getTotalVolume() == 10000);
+        REQUIRE(stats->getProtocolStats().value("TCP") == 1000);
+    }
+
+    SECTION("Different protocols update correctly") {
+        auto pIcmp = std::make_shared<IcmpPacket>("1.1.1.1", "2.2.2.2", 50, 8);
+        stats->update(pIcmp);
+
+        REQUIRE(stats->getTotalPackets() == 1);
+        REQUIRE(stats->getTotalVolume() == 50);
+        REQUIRE(stats->getProtocolStats().value("ICMP") == 1);
+        REQUIRE(stats->getProtocolStats().value("TCP") == 0); // TCP doesn't exist
+    }
+
+    SECTION("Consecutive resets") {
+        auto p = std::make_shared<TcpPacket>("1.1.1.1", "2.2.2.2", 100, 80, 443);
+        stats->update(p);
+
+        stats->reset();
+        stats->reset(); // shouldn't crash
+
+        REQUIRE(stats->getTotalPackets() == 0);
+        REQUIRE(stats->getTotalVolume() == 0);
+        REQUIRE(stats->getProtocolStats().isEmpty());
+    }
 }

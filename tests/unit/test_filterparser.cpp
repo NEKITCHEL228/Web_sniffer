@@ -54,4 +54,41 @@ TEST_CASE("Filter parser syntax and evaluation", "[FilterParser]") {
         // inner is true, not true -> false
         REQUIRE(ast2->evaluate(packet) == false);
     }
+
+    SECTION("Protocol field") {
+        auto ast = FilterParser::parse("ip.proto == TCP");
+        REQUIRE(ast != nullptr);
+        REQUIRE(ast->evaluate(packet) == true);
+
+        auto ast2 = FilterParser::parse("ip.proto == UDP");
+        REQUIRE(ast2 != nullptr);
+        REQUIRE(ast2->evaluate(packet) == false);
+
+        auto ast3 = FilterParser::parse("ip.proto != UDP");
+        REQUIRE(ast3 != nullptr);
+        REQUIRE(ast3->evaluate(packet) == true);
+    }
+
+    SECTION("Complex expression with multiple nesting") {
+        auto ast = FilterParser::parse("(ip.src == 192.168.1.100 or ip.dst == 192.168.1.100) and (tcp.port == 443 or udp.port == 443)");
+        REQUIRE(ast != nullptr);
+        REQUIRE(ast->evaluate(packet) == true);
+
+        auto ast2 = FilterParser::parse("((ip.src == 1.1.1.1) or (ip.dst == 10.0.0.5)) and not (tcp.port == 8080)");
+        REQUIRE(ast2 != nullptr);
+        REQUIRE(ast2->evaluate(packet) == false); // ip.dst is 10.0.0.5 (true) and not (true) => true and false => false
+    }
+
+    SECTION("Invalid syntax") {
+        auto ast = FilterParser::parse("ip.src == ");
+        REQUIRE(ast == nullptr);
+
+        auto ast2 = FilterParser::parse("== 192.168.1.100");
+        REQUIRE(ast2 != nullptr);
+        REQUIRE(ast2->evaluate(packet) == false);
+
+        auto ast3 = FilterParser::parse("ip.src == 192.168...100 and");
+        // Could be parsed as invalid AST based on implementation, let's just make sure it doesn't crash
+        // Our simplified parser might handle this in ways that might be null or return incomplete ast
+    }
 }

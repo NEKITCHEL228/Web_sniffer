@@ -42,4 +42,23 @@ TEST_CASE("Packet implementations", "[Packet]") {
         QString info = pkt.getInfo();
         REQUIRE(info.contains("8", Qt::CaseInsensitive));
     }
+    SECTION("Empty IPs and zero ports in TcpPacket") {
+        TcpPacket pkt("", "", 0, 0, 0);
+        REQUIRE(pkt.getSource() == "");
+        REQUIRE(pkt.getDestination() == "");
+        REQUIRE(pkt.getSize() == 0);
+        REQUIRE(pkt.getProtocol() == "TCP");
+        REQUIRE(pkt.getSrcPort() == 0);
+        REQUIRE(pkt.getDestPort() == 0);
+    }
+
+    SECTION("Maximum values in UdpPacket") {
+        UdpPacket pkt("255.255.255.255", "255.255.255.255", 65535, 65535, 65535);
+        REQUIRE(pkt.getSource() == "255.255.255.255");
+        REQUIRE(pkt.getDestination() == "255.255.255.255");
+        REQUIRE(pkt.getSize() == 65535);
+        REQUIRE(pkt.getProtocol() == "UDP");
+        REQUIRE(pkt.getSrcPort() == 65535);
+        REQUIRE(pkt.getDestPort() == 65535);
+    }
 }

@@ -23,4 +23,31 @@ TEST_CASE("Sniffer basics", "[Sniffer]") {
         sniffer.stopCapture();
         REQUIRE(true);
     }
+
+    SECTION("Stop sniffer without starting") {
+        Sniffer sniffer;
+        sniffer.stopCapture();
+        REQUIRE(true);
+    }
+
+    SECTION("Multiple starts on invalid interfaces") {
+        Sniffer sniffer;
+        sniffer.startCapture("invalid_1");
+        sniffer.startCapture("invalid_2"); // Should handle nicely, maybe ignore or stop first
+        sniffer.stopCapture();
+        REQUIRE(true);
+    }
+
+    SECTION("Available interfaces doesn't throw") {
+        REQUIRE_NOTHROW(Sniffer::getAvailableInterfaces());
+    }
+
+    SECTION("Destroy sniffer while supposedly capturing") {
+        {
+            Sniffer sniffer;
+            sniffer.startCapture("invalid_interface");
+            // destructor called here, shouldn't crash or hang
+        }
+        REQUIRE(true);
+    }
 }
