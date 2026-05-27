@@ -4,17 +4,19 @@
 
 SnifferFacade::SnifferFacade(QObject *parent) : QObject(parent) {
     statistics = Statistics::getInstance();
-    analyzer = std::make_unique<Analyzer>(this);
     sniffer = std::make_unique<Sniffer>(this);
 
     // Связываем компоненты через систему сигналов и слотов Qt (Observer Pattern)
-    connect(sniffer.get(), &Sniffer::packetCaptured,
-            analyzer.get(), &Analyzer::onPacketCaptured);
+    connect(sniffer.get(), &Sniffer::packetCaptured, this, [this](std::shared_ptr<Packet> packet) {
+        statistics->update(packet);
+        AnomalyDetector::getInstance()->update(packet);
+        emit packetProcessed(packet);
+    });
 
-    // Прямая связь анализатора с UI (через родителя)
+    // Прямая связь фасада с UI (через родителя)
     UI* ui = qobject_cast<UI*>(parent);
     if (ui) {
-        connect(analyzer.get(), &Analyzer::packetProcessed,
+        connect(this, &SnifferFacade::packetProcessed,
                 ui, &UI::onPacketReceived);
     }
 }

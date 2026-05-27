@@ -4,8 +4,10 @@
 #include <QObject>
 #include <memory>
 #include "statistics.h"
-#include "analyzer.h"
+#include "anomalydetector.h"
 #include "sniffer.h"
+
+enum class AnalysisCategory;
 
 class SnifferFacade : public QObject {
     Q_OBJECT
@@ -15,9 +17,11 @@ public:
     void stopCapture();
     void applyFilter(const QString &filterStr);
 
+signals:
+    void packetProcessed(std::shared_ptr<Packet> packet);
+
 private:
     Statistics *statistics;
-    std::unique_ptr<Analyzer> analyzer;
     std::unique_ptr<Sniffer> sniffer;
 };
 

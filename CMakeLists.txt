@@ -24,13 +24,12 @@ set(CORE_SOURCES
     src/ui.cpp
     src/sniffer.cpp
     src/snifferfacade.cpp
-    src/analyzer.cpp
+    src/anomalydetector.cpp
     src/packet.cpp
     src/packetfactory.cpp
     src/statistics.cpp
     src/filemanager.cpp
     src/filterwidget.cpp
-    src/filterstrategy.cpp
 )
 
 # Создание статичной библиотеки
@@ -39,7 +38,8 @@ target_include_directories(Web_Sniffer_Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/i
 target_link_libraries(Web_Sniffer_Core PUBLIC Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
 
 # Создание исполняемого файла
-qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION src/main.cpp resources.qrc)
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION src/main.cpp resources.qrc
+    include/anomalydetector.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE Web_Sniffer_Core)
 
 # Пути к заголовочным файлам

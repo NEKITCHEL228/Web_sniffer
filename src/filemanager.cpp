@@ -2,8 +2,8 @@
 #include "packetfactory.h"
 #include <QFile>
 #include <QHostAddress>
-#include <QDateTime>
 #include <QtEndian>
+#include <QDateTime>
 #include <pcap.h>
 
 FileManager* FileManager::instance = nullptr;
@@ -52,25 +52,38 @@ bool FileManager::saveToPcap(const QString &filename, const std::vector<std::sha
 
         QHostAddress srcAddr(packet->getSource());
         QHostAddress dstAddr(packet->getDestination());
-        uint32_t srcIp = qToBigEndian(srcAddr.toIPv4Address());
-        uint32_t dstIp = qToBigEndian(dstAddr.toIPv4Address());
-        memcpy(&data[26], &srcIp, 4);
-        memcpy(&data[30], &dstIp, 4);
+        uint32_t srcIp = srcAddr.toIPv4Address();
+        uint32_t dstIp = dstAddr.toIPv4Address();
+
+        data[26] = (srcIp >> 24) & 0xFF;
+        data[27] = (srcIp >> 16) & 0xFF;
+        data[28] = (srcIp >> 8) & 0xFF;
+        data[29] = srcIp & 0xFF;
+
+        data[30] = (dstIp >> 24) & 0xFF;
+        data[31] = (dstIp >> 16) & 0xFF;
+        data[32] = (dstIp >> 8) & 0xFF;
+        data[33] = dstIp & 0xFF;
 
         // TCP / UDP Header
         if (packet->getProtocol() == "TCP") {
-            uint16_t srcPort = qToBigEndian(packet->getSrcPort());
-            uint16_t dstPort = qToBigEndian(packet->getDestPort());
-            memcpy(&data[34], &srcPort, 2);
-            memcpy(&data[36], &dstPort, 2);
+            uint16_t srcPort = packet->getSrcPort();
+            uint16_t dstPort = packet->getDestPort();
+            data[34] = (srcPort >> 8) & 0xFF;
+            data[35] = srcPort & 0xFF;
+            data[36] = (dstPort >> 8) & 0xFF;
+            data[37] = dstPort & 0xFF;
             data[46] = 0x50; // Data offset 5
         } else if (packet->getProtocol() == "UDP") {
-            uint16_t srcPort = qToBigEndian(packet->getSrcPort());
-            uint16_t dstPort = qToBigEndian(packet->getDestPort());
-            memcpy(&data[34], &srcPort, 2);
-            memcpy(&data[36], &dstPort, 2);
-            uint16_t ulen = qToBigEndian((uint16_t)8); // min length
-            memcpy(&data[38], &ulen, 2);
+            uint16_t srcPort = packet->getSrcPort();
+            uint16_t dstPort = packet->getDestPort();
+            data[34] = (srcPort >> 8) & 0xFF;
+            data[35] = srcPort & 0xFF;
+            data[36] = (dstPort >> 8) & 0xFF;
+            data[37] = dstPort & 0xFF;
+            uint16_t ulen = 8; // min length
+            data[38] = (ulen >> 8) & 0xFF;
+            data[39] = ulen & 0xFF;
         } else if (packet->getProtocol() == "ICMP") {
             data[34] = 8; // Default Echo Request
         }

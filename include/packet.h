@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <memory>
+#include <vector>
 
 class Packet {
 public:
@@ -14,10 +15,13 @@ public:
     QString getProtocol() const { return protocol; }
     int getSize() const { return size; }
     QString getTime() const { return timestamp; }
-    virtual uint16_t getSrcPort() const { return 0; }
-    virtual uint16_t getDestPort() const { return 0; }
+    virtual int getSrcPort() const = 0;
+    virtual int getDestPort() const = 0;
 
     virtual QString getInfo() const = 0;
+
+    void setRawData(const std::vector<uint8_t>& data) { rawData = data; }
+    const std::vector<uint8_t>& getRawData() const { return rawData; }
 
 protected:
     QString sourceIP;
@@ -25,32 +29,35 @@ protected:
     QString protocol;
     QString timestamp;
     int size;
+    std::vector<uint8_t> rawData;
 };
 
 class TcpPacket : public Packet {
-    uint16_t srcPort;
-    uint16_t destPort;
+    int srcPort;
+    int destPort;
 public:
-    TcpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
-    uint16_t getSrcPort() const override { return srcPort; }
-    uint16_t getDestPort() const override { return destPort; }
+    TcpPacket(QString src, QString dest, int sz, int sPort, int dPort);
+    int getSrcPort() const override { return srcPort; }
+    int getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 
 class UdpPacket : public Packet {
-    uint16_t srcPort;
-    uint16_t destPort;
+    int srcPort;
+    int destPort;
 public:
-    UdpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
-    uint16_t getSrcPort() const override { return srcPort; }
-    uint16_t getDestPort() const override { return destPort; }
+    UdpPacket(QString src, QString dest, int sz, int sPort, int dPort);
+    int getSrcPort() const override { return srcPort; }
+    int getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 
 class IcmpPacket : public Packet {
-    uint8_t type;
+    int type;
 public:
-    IcmpPacket(QString src, QString dest, int sz, uint8_t type);
+    IcmpPacket(QString src, QString dest, int sz, int type);
+    int getSrcPort() const override { return 0; }
+    int getDestPort() const override { return 0; }
     QString getInfo() const override;
 };
 
