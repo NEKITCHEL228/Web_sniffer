@@ -2,11 +2,15 @@
 #define PACKET_H
 
 #include <QString>
-#include <memory>
+#include <cstdint>
+#include <vector>
+
+class Packet;
+typedef std::vector<std::shared_ptr<Packet>> PacketList;
 
 class Packet {
 public:
-    Packet(QString srcIP, QString destIP, int size, QString proto);
+    Packet(const QString& srcIP, const QString& destIP, int size, const QString& proto);
     virtual ~Packet() = default;
 
     QString getSource() const { return sourceIP; }
@@ -19,19 +23,23 @@ public:
 
     virtual QString getInfo() const = 0;
 
+    void setRawData(const std::vector<uint8_t>& data) { rawData = data; }
+    const std::vector<uint8_t>& getRawData() const { return rawData; }
+
 protected:
     QString sourceIP;
     QString destIP;
     QString protocol;
     QString timestamp;
     int size;
+    std::vector<uint8_t> rawData;
 };
 
 class TcpPacket : public Packet {
     uint16_t srcPort;
     uint16_t destPort;
 public:
-    TcpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
+    TcpPacket(const QString& src, const QString& dest, int sz, uint16_t sPort, uint16_t dPort);
     uint16_t getSrcPort() const override { return srcPort; }
     uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
@@ -41,7 +49,7 @@ class UdpPacket : public Packet {
     uint16_t srcPort;
     uint16_t destPort;
 public:
-    UdpPacket(QString src, QString dest, int sz, uint16_t sPort, uint16_t dPort);
+    UdpPacket(const QString& src, const QString& dest, int sz, uint16_t sPort, uint16_t dPort);
     uint16_t getSrcPort() const override { return srcPort; }
     uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
@@ -50,7 +58,7 @@ public:
 class IcmpPacket : public Packet {
     uint8_t type;
 public:
-    IcmpPacket(QString src, QString dest, int sz, uint8_t type);
+    IcmpPacket(const QString& src, const QString& dest, int sz, uint8_t type);
     QString getInfo() const override;
 };
 

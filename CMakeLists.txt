@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC OFF)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network Test)
 
@@ -24,13 +24,12 @@ set(CORE_SOURCES
     src/ui.cpp
     src/sniffer.cpp
     src/snifferfacade.cpp
-    src/analyzer.cpp
+    src/anomalydetector.cpp
     src/packet.cpp
     src/packetfactory.cpp
     src/statistics.cpp
     src/filemanager.cpp
     src/filterwidget.cpp
-    src/filterstrategy.cpp
 )
 
 # Создание статичной библиотеки

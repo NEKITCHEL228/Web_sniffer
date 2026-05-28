@@ -1,0 +1,26 @@
+# Ignore build artifacts and cache
+build/
+bin/
+out/
+cmake-build-debug/
+cmake-build-release/
+.cmake/
+
+# Ignore IDE settings
+.vscode/
+.idea/
+*.user
+*.user.*
+*.suo
+*.sln
+*.vcproj
+
+# Ignore local dependency folders & lockfiles
+node_modules/
+dist/
+.env
+
+# Version control
+.git/
+.gitignore
+.gitattributes

@@ -8,10 +8,9 @@ FetchContent_MakeAvailable(Catch2)
 
 file(GLOB PROJECT_TEST_HEADERS "${CMAKE_SOURCE_DIR}/include/*.h")
 add_executable(unit_tests
-    test_analyzer.cpp
+    test_anomalydetector.cpp
     test_filemanager.cpp
     test_filterparser.cpp
-    test_filterstrategy.cpp
     test_packet.cpp
     test_packetfactory.cpp
     test_sniffer.cpp
