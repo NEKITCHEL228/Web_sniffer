@@ -13,11 +13,21 @@ SnifferFacade::SnifferFacade(QObject *parent) : QObject(parent) {
         emit packetProcessed(packet);
     });
 
+    connect(sniffer.get(), &Sniffer::packetsCapturedBatch, this, [this](const PacketList& packets) {
+        for (const auto& p : packets) {
+            statistics->update(p);
+            AnomalyDetector::getInstance()->update(p);
+        }
+        emit packetsProcessedBatch(packets);
+    });
+
     // Прямая связь фасада с UI (через родителя)
     UI* ui = qobject_cast<UI*>(parent);
     if (ui) {
         connect(this, &SnifferFacade::packetProcessed,
                 ui, &UI::onPacketReceived);
+        connect(this, &SnifferFacade::packetsProcessedBatch,
+                ui, &UI::onPacketsReceivedBatch);
     }
 }
 

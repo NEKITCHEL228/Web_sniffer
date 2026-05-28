@@ -2,13 +2,17 @@
 #define SNIFFER_H
 
 #include <QObject>
+#include <QString>
+#include <QMetaType>
 #include <memory>
+#include <vector>
 #include <thread>
 #include <atomic>
+#include "packet.h"
 
 typedef struct pcap pcap_t;
 
-class Packet;
+Q_DECLARE_METATYPE(PacketList)
 
 struct InterfaceInfo {
     QString name;
@@ -27,6 +31,7 @@ public:
 
 signals:
     void packetCaptured(std::shared_ptr<Packet> packet);
+    void packetsCapturedBatch(const PacketList& packets);
 
 private:
     void captureLoop();

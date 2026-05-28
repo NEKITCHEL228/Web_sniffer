@@ -20,6 +20,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFileDialog>
+#include <QWidget>
+#include <QTimer>
 
 UI::UI(QWidget *parent) : QMainWindow(parent) {
     facade = std::make_unique<SnifferFacade>(this);
@@ -27,6 +29,10 @@ UI::UI(QWidget *parent) : QMainWindow(parent) {
     applyStyles();
     onRefreshInterfaces();
     showCaptureView(); // Set initial view
+
+    updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, &UI::processPendingPackets);
+    updateTimer->start(100);
 }
 
 UI::~UI() {}
@@ -155,6 +161,7 @@ void UI::setupUI() {
     comboInterface = new QComboBox(this);
     comboInterface->setMinimumWidth(300);
     comboInterface->setFixedHeight(44);
+    comboInterface->setMaxVisibleItems(10);
     topPanel->addWidget(comboInterface);
 
     btnClearTable = new QPushButton(this);
@@ -336,11 +343,39 @@ void UI::onStopClicked() {
 }
 
 void UI::onPacketReceived(std::shared_ptr<Packet> packet) {
-    allPackets.push_back(packet);
-    if (isPacketMatching(packet)) {
-        addPacketToTable(packet);
+    std::lock_guard<std::mutex> lock(queueMutex);
+    pendingPackets.push_back(packet);
+}
+
+void UI::onPacketsReceivedBatch(const PacketList& packets) {
+    std::lock_guard<std::mutex> lock(queueMutex);
+    pendingPackets.insert(pendingPackets.end(), packets.begin(), packets.end());
+}
+
+void UI::processPendingPackets() {
+    std::vector<std::shared_ptr<Packet>> batch;
+    {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        if (pendingPackets.empty()) return;
+        batch = std::move(pendingPackets);
+        pendingPackets.clear();
     }
-    updateStatistics();
+
+    bool addedAny = false;
+    packetTable->setUpdatesEnabled(false);
+    for (const auto& packet : batch) {
+        allPackets.push_back(packet);
+        if (isPacketMatching(packet)) {
+            addPacketToTable(packet);
+            addedAny = true;
+        }
+    }
+    packetTable->setUpdatesEnabled(true);
+
+    if (addedAny) {
+        packetTable->scrollToBottom();
+        updateStatistics();
+    }
 }
 
 void UI::addPacketToTable(std::shared_ptr<Packet> packet) {
@@ -367,8 +402,6 @@ void UI::addPacketToTable(std::shared_ptr<Packet> packet) {
     auto *infoItem = new QTableWidgetItem(packet->getInfo());
     infoItem->setTextAlignment(Qt::AlignCenter);
     packetTable->setItem(row, 4, infoItem);
-
-    packetTable->scrollToBottom();
 }
 
 void UI::setupButtonContent(QPushButton* btn, const QString& text, const QString& iconPath) {
@@ -406,6 +439,7 @@ void UI::applyStyles() {
         QMainWindow { background-color: #0F172A; }
         QComboBox { background-color: #1E293B; border: 1px solid #334155; border-radius: 8px; color: #F8FAFC; padding: 0 12px; font-size: 13px; }
         QComboBox:hover {background-color: #334155}
+        QComboBox QAbstractItemView { outline: 0px; background-color: #1E293B; color: #F8FAFC; selection-background-color: #3B82F6; }
         QComboBox::drop-down { border: none; width: 44px; padding-right: 0px; }
         QComboBox::down-arrow { image: url(":/icons/Choose.svg"); width: 20px; height: 20px; }
         QLineEdit { background-color: #1E293B; border: 1px solid #334155; border-radius: 8px; color: #F8FAFC; padding: 0 12px; font-size: 13px; }
@@ -489,12 +523,17 @@ void UI::applySimpleFilter(SimpleFilterData data) {
 }
 
 void UI::redrawTable() {
+    packetTable->setUpdatesEnabled(false);
     packetTable->setRowCount(0);
     displayedPackets.clear();
     for (const auto& packet : allPackets) {
         if (isPacketMatching(packet)) {
             addPacketToTable(packet);
         }
+    }
+    packetTable->setUpdatesEnabled(true);
+    if (packetTable->rowCount() > 0) {
+        packetTable->scrollToBottom();
     }
     updateStatistics();
 }
