@@ -2,12 +2,15 @@
 #define PACKET_H
 
 #include <QString>
-#include <memory>
+#include <cstdint>
 #include <vector>
+
+class Packet;
+typedef std::vector<std::shared_ptr<Packet>> PacketList;
 
 class Packet {
 public:
-    Packet(QString srcIP, QString destIP, int size, QString proto);
+    Packet(const QString& srcIP, const QString& destIP, int size, const QString& proto);
     virtual ~Packet() = default;
 
     QString getSource() const { return sourceIP; }
@@ -15,8 +18,8 @@ public:
     QString getProtocol() const { return protocol; }
     int getSize() const { return size; }
     QString getTime() const { return timestamp; }
-    virtual int getSrcPort() const = 0;
-    virtual int getDestPort() const = 0;
+    virtual uint16_t getSrcPort() const { return 0; }
+    virtual uint16_t getDestPort() const { return 0; }
 
     virtual QString getInfo() const = 0;
 
@@ -33,31 +36,29 @@ protected:
 };
 
 class TcpPacket : public Packet {
-    int srcPort;
-    int destPort;
+    uint16_t srcPort;
+    uint16_t destPort;
 public:
-    TcpPacket(QString src, QString dest, int sz, int sPort, int dPort);
-    int getSrcPort() const override { return srcPort; }
-    int getDestPort() const override { return destPort; }
+    TcpPacket(const QString& src, const QString& dest, int sz, uint16_t sPort, uint16_t dPort);
+    uint16_t getSrcPort() const override { return srcPort; }
+    uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 
 class UdpPacket : public Packet {
-    int srcPort;
-    int destPort;
+    uint16_t srcPort;
+    uint16_t destPort;
 public:
-    UdpPacket(QString src, QString dest, int sz, int sPort, int dPort);
-    int getSrcPort() const override { return srcPort; }
-    int getDestPort() const override { return destPort; }
+    UdpPacket(const QString& src, const QString& dest, int sz, uint16_t sPort, uint16_t dPort);
+    uint16_t getSrcPort() const override { return srcPort; }
+    uint16_t getDestPort() const override { return destPort; }
     QString getInfo() const override;
 };
 
 class IcmpPacket : public Packet {
-    int type;
+    uint8_t type;
 public:
-    IcmpPacket(QString src, QString dest, int sz, int type);
-    int getSrcPort() const override { return 0; }
-    int getDestPort() const override { return 0; }
+    IcmpPacket(const QString& src, const QString& dest, int sz, uint8_t type);
     QString getInfo() const override;
 };
 

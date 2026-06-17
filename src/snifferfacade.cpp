@@ -13,7 +13,11 @@ SnifferFacade::SnifferFacade(QObject *parent) : QObject(parent) {
         emit packetProcessed(packet);
     });
 
+<<<<<<< HEAD
     connect(sniffer.get(), &Sniffer::packetsCapturedBatch, this, [this](const std::vector<std::shared_ptr<Packet>>& packets) {
+=======
+    connect(sniffer.get(), &Sniffer::packetsCapturedBatch, this, [this](const PacketList& packets) {
+>>>>>>> 3038150c0d1b4526f5669583770754a7878149b2
         for (const auto& p : packets) {
             statistics->update(p);
             AnomalyDetector::getInstance()->update(p);

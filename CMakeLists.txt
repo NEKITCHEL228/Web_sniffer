@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC OFF)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Gui Core Network Test)
 
@@ -38,8 +38,7 @@ target_include_directories(Web_Sniffer_Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/i
 target_link_libraries(Web_Sniffer_Core PUBLIC Qt6::Widgets Qt6::Gui Qt6::Core Qt6::Network)
 
 # Создание исполняемого файла
-qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION src/main.cpp resources.qrc
-    include/anomalydetector.h)
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION src/main.cpp resources.qrc)
 target_link_libraries(${PROJECT_NAME} PRIVATE Web_Sniffer_Core)
 
 # Пути к заголовочным файлам
