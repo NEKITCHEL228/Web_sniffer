@@ -347,7 +347,11 @@ void UI::onPacketReceived(std::shared_ptr<Packet> packet) {
     pendingPackets.push_back(packet);
 }
 
+<<<<<<< HEAD
+void UI::onPacketsReceivedBatch(const std::vector<std::shared_ptr<Packet>>& packets) {
+=======
 void UI::onPacketsReceivedBatch(const PacketList& packets) {
+>>>>>>> 3038150c0d1b4526f5669583770754a7878149b2
     std::lock_guard<std::mutex> lock(queueMutex);
     pendingPackets.insert(pendingPackets.end(), packets.begin(), packets.end());
 }
