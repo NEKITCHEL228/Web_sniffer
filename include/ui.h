@@ -10,6 +10,8 @@
 
 #include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QTimer>
+#include <mutex>
 
 class QPushButton;
 class QLineEdit;
@@ -38,6 +40,7 @@ public:
 
 public slots:
     void onPacketReceived(std::shared_ptr<Packet> packet);
+    void onPacketsReceivedBatch(const std::vector<std::shared_ptr<Packet>>& packets);
 
 private slots:
     void onStartClicked();
@@ -112,5 +115,10 @@ private:
     QWidget *prevWidgetForDetails; // keep track of where to return
     void backFromPacketDetails();
     void showPacketDetailsWithPacket(std::shared_ptr<Packet> packet, int displayRow);
+
+    QTimer *updateTimer;
+    std::mutex queueMutex;
+    std::vector<std::shared_ptr<Packet>> pendingPackets;
+    void processPendingPackets();
 };
 #endif

@@ -8,6 +8,7 @@
 
 Sniffer::Sniffer(QObject *parent) : QObject(parent), capturing(false), handle(nullptr) {
     qRegisterMetaType<std::shared_ptr<Packet>>("std::shared_ptr<Packet>");
+    qRegisterMetaType<std::vector<std::shared_ptr<Packet>>>("std::vector<std::shared_ptr<Packet>>");
 }
 
 Sniffer::~Sniffer() {
@@ -93,18 +94,37 @@ void Sniffer::captureLoop() {
     const u_char *pkt_data;
     int res;
 
+    std::vector<std::shared_ptr<Packet>> batch;
+    batch.reserve(256);
+    auto lastEmitTime = std::chrono::steady_clock::now();
+
     while (capturing && (res = pcap_next_ex(handle, &header, &pkt_data)) >= 0) {
         if (res == 0) {
-            // Timeout elapsed
+            // Timeout elapsed, flush batch
+            if (!batch.empty()) {
+                emit packetsCapturedBatch(batch);
+                batch.clear();
+            }
             continue;
         }
 
         if (capturing) {
             std::shared_ptr<Packet> pInfo = PacketFactory::createPacket(pkt_data, header->caplen);
             if (pInfo != nullptr) {
-                // Emit signal instead of directly calling. It's thread safe.
-                emit packetCaptured(pInfo);
+                batch.push_back(pInfo);
+
+                auto now = std::chrono::steady_clock::now();
+                if (batch.size() >= 256 || std::chrono::duration_cast<std::chrono::milliseconds>(now - lastEmitTime).count() > 50) {
+                    emit packetsCapturedBatch(batch);
+                    batch.clear();
+                    lastEmitTime = now;
+                }
             }
         }
+    }
+
+    // final flush
+    if (!batch.empty() && capturing) {
+        emit packetsCapturedBatch(batch);
     }
 }

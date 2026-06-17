@@ -27,6 +27,7 @@ public:
 
 signals:
     void packetCaptured(std::shared_ptr<Packet> packet);
+    void packetsCapturedBatch(const std::vector<std::shared_ptr<Packet>>& packets);
 
 private:
     void captureLoop();

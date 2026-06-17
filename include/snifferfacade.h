@@ -19,6 +19,7 @@ public:
 
 signals:
     void packetProcessed(std::shared_ptr<Packet> packet);
+    void packetsProcessedBatch(const std::vector<std::shared_ptr<Packet>>& packets);
 
 private:
     Statistics *statistics;
