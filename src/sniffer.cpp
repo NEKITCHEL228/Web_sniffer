@@ -8,11 +8,7 @@
 
 Sniffer::Sniffer(QObject *parent) : QObject(parent), capturing(false), handle(nullptr) {
     qRegisterMetaType<std::shared_ptr<Packet>>("std::shared_ptr<Packet>");
-<<<<<<< HEAD
-    qRegisterMetaType<std::vector<std::shared_ptr<Packet>>>("std::vector<std::shared_ptr<Packet>>");
-=======
     qRegisterMetaType<PacketList>("PacketList");
->>>>>>> 3038150c0d1b4526f5669583770754a7878149b2
 }
 
 Sniffer::~Sniffer() {
